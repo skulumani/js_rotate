@@ -1,3 +1,6 @@
+
+![Gif](./matlab/animation.gif)
+
 ## Example of rigid body rotations in Javascript
 
 This example uses the [three.js](https://github.com/mrdoob/three.js) library, which provides an easy and lightweight 3D visualization library. 
