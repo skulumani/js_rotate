@@ -11,3 +11,8 @@ In order to visualize the orientation of an IMU(rigid body) with respect to the 
 5. Render
 
 There is an example in both Matlab and Javascript. 
+
+## Viewing the animation
+
+Matlab - Run `draw_cad.m`
+Javascript - Open `index.hmtl` with Chrome
