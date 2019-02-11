@@ -2,14 +2,16 @@
 % script to test and animate motion
 close all
 
-% load model
+% load model and set some parameters
 load('TacSAT.mat');
+type = 'gif';
+filename = 'animation';
 
 % Scale model to fit appropriately
 TV = 1/300*[TV(:,1) TV(:,2) TV(:,3)]*ROT2(pi/2)';
 boresight = [1, 0, 0];
 % set up the figure window
-figure('color','w','units','normalized','outerposition',[0 0 1 1])
+figure('color','w')
 hold all
 
 % radius of cone at unit length
@@ -25,6 +27,7 @@ light('Position',[0 0 100],'Style','infinite');
 material dull;
 axis equal;
 axis off
+view(30, 30)
 xlabel('x')
 ylabel('y')
 zlabel('z')
@@ -39,13 +42,11 @@ line([0 1],[0 0],[0 0],'color','k','linewidth',3);
 line([0 0],[0 1],[0 0],'color','k','linewidth',3);
 line([0 0],[0 0],[0 1],'color','k','linewidth',3);
 
-% draw a body fixed referenece frame
-
 % define an example series of rotations
-tspan = 1:1:100;
-rot_vec = [1, 0, 0];
+tspan = 1:1:500;
+rot_vec = [1, 1, 0];
 for ii = 1:length(tspan)
-    R_b2i(:, :, ii) = expm(hat_map(rot_vec)*2*pi/100*tspan(ii));
+    R_b2i(:, :, ii) = expm(hat_map(rot_vec)*2*pi/500*tspan(ii));
 end
 
 switch type
@@ -62,7 +63,7 @@ switch type
 end
 
 hold on
-% line([0 boresight(1)],[0 boresight(2)],[0 boresight(3)],'color','k','linewidth',3);
+
 for ii = 1:10:length(tspan)
     
     % rotate the mesh
@@ -71,10 +72,16 @@ for ii = 1:10:length(tspan)
     % update the mesh
     set(tcs,'Vertices',nTV);
    
-    % update the body axes
-    bore_handle = line([0 sen_inertial(ii,1)],[0 sen_inertial(ii,2)],[0 sen_inertial(ii,3)],'color','k','linewidth',3);
-    plot3(sen_inertial(1:ii,1),sen_inertial(1:ii,2),sen_inertial(1:ii,3),'b','linewidth',3);
+    % this is the body frame of the rigid body rotated to the inertial
+    % frame
+    body_x = R_b2i(:, :, ii) * [1; 0; 0];
+    body_y = R_b2i(:, :, ii) * [0; 1; 0];
+    body_z = R_b2i(:, :, ii) * [0; 0; 1];
     
+    body_x_line = line([0 body_x(1)], [0 body_x(2)], [0 body_x(3)], 'color', 'r', 'linewidth', 3);
+    body_y_line = line([0 body_y(1)], [0 body_y(2)], [0 body_y(3)], 'color', 'g', 'linewidth', 3);
+    body_z_line = line([0 body_z(1)], [0 body_z(2)], [0 body_z(3)], 'color', 'b', 'linewidth', 3);
+
     drawnow
 
     % render a frame
@@ -96,10 +103,11 @@ for ii = 1:10:length(tspan)
 %             M(ii)=getframe(gcf,[0 0 560 420]); % leaving gcf out crops the frame in the movie.
             writeVideo(vidObj,getframe(gca));
         otherwise
-            
-            
+            fprintf('Wrong type')
     end
-    delete(bore_handle)
+    delete(body_x_line)
+    delete(body_y_line)
+    delete(body_z_line)
 end
 
 
@@ -117,5 +125,5 @@ switch type
 end
 
 fprintf('\nFINISHED ANIMATION\n\n')
-fprintf('\nLOOK FOR %s in current directory\n\n', filename)
+fprintf('\nLOOK FOR %s in current directory\n\n', [filename, '.gif'])
 
